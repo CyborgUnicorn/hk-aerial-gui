@@ -1,0 +1,1 @@
+angular.module('hk-aerial-gui', []);

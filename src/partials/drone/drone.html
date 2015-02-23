@@ -1,0 +1,27 @@
+<div class="drone" ng-controller="DroneCtrl as drone">
+  <h2>Drone</h2>
+  <input type="text" placeholder="IP" /> <button>Connect</button>
+
+  <section>
+    <h3>Motors</h3>
+  </section>
+
+  <section>
+    <h3>Attitude / Altitude / Heading</h3>
+    <artificial-horizon></artificial-horizon>
+    <compass></compass>
+    <altimeter></altimeter>
+  </section>
+
+  <section>
+    <h3>Controls</h3>
+    Throttle:
+    <adjustable-slider min="1100" max="1900" middle="1100"></adjustable-slider>
+    Roll:
+    <adjustable-slider min="1100" max="1900" middle="1500"></adjustable-slider>
+    Pitch:
+    <adjustable-slider min="1100" max="1900" middle="1500"></adjustable-slider>
+    Yaw:
+    <adjustable-slider min="1100" max="1900" middle="1500"></adjustable-slider>
+  </section>
+</div>

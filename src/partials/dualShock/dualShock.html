@@ -1,0 +1,9 @@
+<div ng-controller="DualShockCtrl as ctrl">
+  DualShock
+  <button ng-click="ctrl.connect()" ng-hide="connected">Connect</button>
+  <span ng-show="connected">Connected</span>
+
+  <dualshock-move control="left"></dualshock-move>
+  <dualshock-move control="right"></dualshock-move>
+  <dualshock-analog control="r2"></dualshock-analog>
+</div>
