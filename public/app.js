@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.13
+ * @license AngularJS v1.3.14
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -54,7 +54,7 @@ function minErr(module, ErrorConstructor) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.13/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.14/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i - 2) + '=' +
@@ -2121,11 +2121,11 @@ function toDebugString(obj) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.3.13',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.3.14',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 3,
-  dot: 13,
-  codeName: 'meticulous-riffleshuffle'
+  dot: 14,
+  codeName: 'instantaneous-browserification'
 };
 
 
@@ -17854,20 +17854,23 @@ var htmlAnchorDirective = valueFn({
  *
  * @description
  *
- * We shouldn't do this, because it will make the button enabled on Chrome/Firefox but not on IE8 and older IEs:
+ * This directive sets the `disabled` attribute on the element if the
+ * {@link guide/expression expression} inside `ngDisabled` evaluates to truthy.
+ *
+ * A special directive is necessary because we cannot use interpolation inside the `disabled`
+ * attribute.  The following example would make the button enabled on Chrome/Firefox
+ * but not on older IEs:
+ *
  * ```html
- * <div ng-init="scope = { isDisabled: false }">
- *  <button disabled="{{scope.isDisabled}}">Disabled</button>
+ * <div ng-init="isDisabled = false">
+ *  <button disabled="{{isDisabled}}">Disabled</button>
  * </div>
  * ```
  *
- * The HTML specification does not require browsers to preserve the values of boolean attributes
- * such as disabled. (Their presence means true and their absence means false.)
+ * This is because the HTML specification does not require browsers to preserve the values of
+ * boolean attributes such as `disabled` (Their presence means true and their absence means false.)
  * If we put an Angular interpolation expression into such an attribute then the
  * binding information would be lost when the browser removes the attribute.
- * The `ngDisabled` directive solves this problem for the `disabled` attribute.
- * This complementary directive is not removed by the browser and so provides
- * a permanent reliable place to store the binding information.
  *
  * @example
     <example>
@@ -17886,7 +17889,7 @@ var htmlAnchorDirective = valueFn({
  *
  * @element INPUT
  * @param {expression} ngDisabled If the {@link guide/expression expression} is truthy,
- *     then special attribute "disabled" will be set on the element
+ *     then the `disabled` attribute will be set on the element
  */
 
 
@@ -19888,7 +19891,7 @@ function numberInputType(scope, element, attr, ctrl, $sniffer, $browser) {
     return value;
   });
 
-  if (attr.min || attr.ngMin) {
+  if (isDefined(attr.min) || attr.ngMin) {
     var minVal;
     ctrl.$validators.min = function(value) {
       return ctrl.$isEmpty(value) || isUndefined(minVal) || value >= minVal;
@@ -19904,7 +19907,7 @@ function numberInputType(scope, element, attr, ctrl, $sniffer, $browser) {
     });
   }
 
-  if (attr.max || attr.ngMax) {
+  if (isDefined(attr.max) || attr.ngMax) {
     var maxVal;
     ctrl.$validators.max = function(value) {
       return ctrl.$isEmpty(value) || isUndefined(maxVal) || value <= maxVal;
@@ -22710,6 +22713,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
       ngModelGet = parsedNgModel,
       ngModelSet = parsedNgModelAssign,
       pendingDebounce = null,
+      parserValid,
       ctrl = this;
 
   this.$$setOptions = function(options) {
@@ -22982,16 +22986,12 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     // the model although neither viewValue nor the model on the scope changed
     var modelValue = ctrl.$$rawModelValue;
 
-    // Check if the there's a parse error, so we don't unset it accidentially
-    var parserName = ctrl.$$parserName || 'parse';
-    var parserValid = ctrl.$error[parserName] ? false : undefined;
-
     var prevValid = ctrl.$valid;
     var prevModelValue = ctrl.$modelValue;
 
     var allowInvalid = ctrl.$options && ctrl.$options.allowInvalid;
 
-    ctrl.$$runValidators(parserValid, modelValue, viewValue, function(allValid) {
+    ctrl.$$runValidators(modelValue, viewValue, function(allValid) {
       // If there was no change in validity, don't update the model
       // This prevents changing an invalid modelValue to undefined
       if (!allowInvalid && prevValid !== allValid) {
@@ -23009,12 +23009,12 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
 
   };
 
-  this.$$runValidators = function(parseValid, modelValue, viewValue, doneCallback) {
+  this.$$runValidators = function(modelValue, viewValue, doneCallback) {
     currentValidationRunId++;
     var localValidationRunId = currentValidationRunId;
 
     // check parser error
-    if (!processParseErrors(parseValid)) {
+    if (!processParseErrors()) {
       validationDone(false);
       return;
     }
@@ -23024,21 +23024,22 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     }
     processAsyncValidators();
 
-    function processParseErrors(parseValid) {
+    function processParseErrors() {
       var errorKey = ctrl.$$parserName || 'parse';
-      if (parseValid === undefined) {
+      if (parserValid === undefined) {
         setValidity(errorKey, null);
       } else {
-        setValidity(errorKey, parseValid);
-        if (!parseValid) {
+        if (!parserValid) {
           forEach(ctrl.$validators, function(v, name) {
             setValidity(name, null);
           });
           forEach(ctrl.$asyncValidators, function(v, name) {
             setValidity(name, null);
           });
-          return false;
         }
+        // Set the parse error last, to prevent unsetting it, should a $validators key == parserName
+        setValidity(errorKey, parserValid);
+        return parserValid;
       }
       return true;
     }
@@ -23133,7 +23134,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
   this.$$parseAndValidate = function() {
     var viewValue = ctrl.$$lastCommittedViewValue;
     var modelValue = viewValue;
-    var parserValid = isUndefined(modelValue) ? undefined : true;
+    parserValid = isUndefined(modelValue) ? undefined : true;
 
     if (parserValid) {
       for (var i = 0; i < ctrl.$parsers.length; i++) {
@@ -23159,7 +23160,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
 
     // Pass the $$lastCommittedViewValue here, because the cached viewValue might be out of date.
     // This can happen if e.g. $setViewValue is called from inside a parser
-    ctrl.$$runValidators(parserValid, modelValue, ctrl.$$lastCommittedViewValue, function(allValid) {
+    ctrl.$$runValidators(modelValue, ctrl.$$lastCommittedViewValue, function(allValid) {
       if (!allowInvalid) {
         // Note: Don't check ctrl.$valid here, as we could have
         // external validators (e.g. calculated on the server),
@@ -23280,6 +23281,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     // TODO(perf): why not move this to the action fn?
     if (modelValue !== ctrl.$modelValue) {
       ctrl.$modelValue = ctrl.$$rawModelValue = modelValue;
+      parserValid = undefined;
 
       var formatters = ctrl.$formatters,
           idx = formatters.length;
@@ -23292,7 +23294,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
         ctrl.$viewValue = ctrl.$$lastCommittedViewValue = viewValue;
         ctrl.$render();
 
-        ctrl.$$runValidators(undefined, modelValue, viewValue, noop);
+        ctrl.$$runValidators(modelValue, viewValue, noop);
       }
     }
 
@@ -24108,6 +24110,55 @@ var ngPluralizeDirective = ['$locale', '$interpolate', function($locale, $interp
  * when keys are deleted and reinstated.
  *
  *
+ * # Tracking and Duplicates
+ *
+ * When the contents of the collection change, `ngRepeat` makes the corresponding changes to the DOM:
+ *
+ * * When an item is added, a new instance of the template is added to the DOM.
+ * * When an item is removed, its template instance is removed from the DOM.
+ * * When items are reordered, their respective templates are reordered in the DOM.
+ *
+ * By default, `ngRepeat` does not allow duplicate items in arrays. This is because when
+ * there are duplicates, it is not possible to maintain a one-to-one mapping between collection
+ * items and DOM elements.
+ *
+ * If you do need to repeat duplicate items, you can substitute the default tracking behavior
+ * with your own using the `track by` expression.
+ *
+ * For example, you may track items by the index of each item in the collection, using the
+ * special scope property `$index`:
+ * ```html
+ *    <div ng-repeat="n in [42, 42, 43, 43] track by $index">
+ *      {{n}}
+ *    </div>
+ * ```
+ *
+ * You may use arbitrary expressions in `track by`, including references to custom functions
+ * on the scope:
+ * ```html
+ *    <div ng-repeat="n in [42, 42, 43, 43] track by myTrackingFunction(n)">
+ *      {{n}}
+ *    </div>
+ * ```
+ *
+ * If you are working with objects that have an identifier property, you can track
+ * by the identifier instead of the whole object. Should you reload your data later, `ngRepeat`
+ * will not have to rebuild the DOM elements for items it has already rendered, even if the
+ * JavaScript objects in the collection have been substituted for new ones:
+ * ```html
+ *    <div ng-repeat="model in collection track by model.id">
+ *      {{model.name}}
+ *    </div>
+ * ```
+ *
+ * When no `track by` expression is provided, it is equivalent to tracking by the built-in
+ * `$id` function, which tracks items by their identity:
+ * ```html
+ *    <div ng-repeat="obj in collection track by $id(obj)">
+ *      {{obj.prop}}
+ *    </div>
+ * ```
+ *
  * # Special repeat start and end points
  * To repeat a series of elements instead of just one parent element, ngRepeat (as well as other ng directives) supports extending
  * the range of the repeater by defining explicit start and end points by using **ng-repeat-start** and **ng-repeat-end** respectively.
@@ -24175,12 +24226,12 @@ var ngPluralizeDirective = ['$locale', '$interpolate', function($locale, $interp
  *
  *     For example: `(name, age) in {'adam':10, 'amalie':12}`.
  *
- *   * `variable in expression track by tracking_expression` – You can also provide an optional tracking function
- *     which can be used to associate the objects in the collection with the DOM elements. If no tracking function
- *     is specified the ng-repeat associates elements by identity in the collection. It is an error to have
- *     more than one tracking function to resolve to the same key. (This would mean that two distinct objects are
- *     mapped to the same DOM element, which is not possible.)  Filters should be applied to the expression,
- *     before specifying a tracking expression.
+ *   * `variable in expression track by tracking_expression` – You can also provide an optional tracking expression
+ *     which can be used to associate the objects in the collection with the DOM elements. If no tracking expression
+ *     is specified, ng-repeat associates elements by identity. It is an error to have
+ *     more than one tracking expression value resolve to the same key. (This would mean that two distinct objects are
+ *     mapped to the same DOM element, which is not possible.)  If filters are used in the expression, they should be
+ *     applied before the tracking expression.
  *
  *     For example: `item in items` is equivalent to `item in items track by $id(item)`. This implies that the DOM elements
  *     will be associated by item identity in the array.
@@ -26129,18 +26180,6 @@ var minlengthDirective = function() {
 
 !window.angular.$$csp() && window.angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}</style>');
 angular.module('hk-aerial-gui', []);
-angular.module("hk-aerial-gui").run(["$templateCache", function($templateCache) {$templateCache.put("index.html","<!doctype html>\n<html ng-app=\"hk-aerial-gui\">\n<head>\n  <title></title>\n\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta charset=\"utf-8\">\n\n  <!-- App LESS -->\n  <link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\" />\n\n</head>\n<body>\n\n  <!-- Livereload script for development only (stripped during dist build) -->\n  <script src=\"http://localhost:35729/livereload.js\" data-build=\"exclude\"></script>\n\n  <!-- JS from Bower components -->\n  <script src=\"bower_components/angular/angular.js\"></script>\n\n  <!-- Main App JS -->\n  <script src=\"setup/module.js\"></script>\n  <script src=\"setup/config.js\"></script>\n  <script src=\"setup/run.js\"></script>\n\n  <!-- controllers -->\n  <!-- /controllers -->\n\n  <!-- directives -->\n  <script src=\"directives/dualshockAnalog/dualshockAnalog.js\"></script>\n  <script src=\"directives/dualshockMove/dualshockMove.js\"></script>\n  <script src=\"directives/artificialHorizon/artificialHorizon.js\"></script>\n  <script src=\"directives/compass/compass.js\"></script>\n  <script src=\"directives/altimeter/altimeter.js\"></script>\n  <script src=\"directives/adjustableSlider/adjustableSlider.js\"></script>\n  <!-- /directives -->\n\n  <!-- filters -->\n  <!-- /filters -->\n\n  <!-- models -->\n  <script src=\"models/drone.js\"></script>\n  <script src=\"models/dualShock.js\"></script>\n  <!-- /models -->\n\n  <!-- partials -->\n  <script src=\"partials/main/mainCtrl.js\"></script>\n  <script src=\"partials/connect/connectCtrl.js\"></script>\n  <script src=\"partials/debug/debugCtrl.js\"></script>\n  <script src=\"partials/rc/rcCtrl.js\"></script>\n  <script src=\"partials/dualShock/dualShockCtrl.js\"></script>\n  <script src=\"partials/drone/droneCtrl.js\"></script>\n  <!-- /partials -->\n\n  <!-- services -->\n  <script src=\"services/socket.js\"></script>\n  <!-- /services -->\n\n  <ng-include src=\"\'partials/main/main.html\'\"></ng-include>\n  \n</body>\n</html>");
-$templateCache.put("directives/adjustableSlider/adjustableSlider.html","<div class=\"adjustableSlider\">\n  Adjustable slider\n</div>");
-$templateCache.put("directives/altimeter/altimeter.html","<div class=\"altimeter\">\n  Altimeter\n</div>");
-$templateCache.put("directives/artificialHorizon/artificialHorizon.html","<div class=\"artificialHorizon\">\n  Artificial horizon\n</div>");
-$templateCache.put("directives/compass/compass.html","<div class=\"compass\">\n  Compass\n</div>");
-$templateCache.put("directives/dualshockAnalog/dualshockAnalog.html","<div>\n  \n</div>");
-$templateCache.put("directives/dualshockMove/dualshockMove.html","<div class=\"dualshockMove\">\n  <div class=\"point\" />\n</div>");
-$templateCache.put("partials/debug/debug.html","<div class=\"debug\" ng-controller=\"DebugCtrl\">\n  <pre>\n    Pitch: {{rc.pitch}}\n    Roll: {{rc.roll}}\n    Yaw: {{rc.yaw}}\n    Throttle: {{rc.throttle}}\n    Aux1: {{rc.aux1}}\n    Aux1: {{rc.aux2}}\n    Aux1: {{rc.aux3}}\n    Aux1: {{rc.aux4}}\n    Motor: {{motor}}\n    Motor (computed): {{motorComputed}}\n    Servo: {{servo[5]}}\n    Angles: {{attitude.angles[0]}} {{attitude.angles[1]}}\n    Heading: {{attitude.heading}}\n    HeadFreeModeHold: {{attitude.headFreeModeHold}}\n    AccSmooth: {{rawImu.accSmooth}}\n    GyroData: {{rawImu.gyroData}}\n    MagADC: {{rawImu.magADC}}\n    Range: {{range}}\n  </pre>\n  <pre>\n    Atomic: {{atomic}}\n  </pre>\n  <div class=\"well\">\n    roll:\n      P <input type=\"number\" ng-model=\"pid.roll.p\" />\n      I <input type=\"number\" ng-model=\"pid.roll.i\" />\n      D <input type=\"number\" ng-model=\"pid.roll.d\" />\n    <br />\n    pitch:\n      P <input type=\"number\" ng-model=\"pid.pitch.p\" />\n      I <input type=\"number\" ng-model=\"pid.pitch.i\" />\n      D <input type=\"number\" ng-model=\"pid.pitch.d\" />\n    <br />\n    yaw:\n      P <input type=\"number\" ng-model=\"pid.yaw.p\" />\n      I <input type=\"number\" ng-model=\"pid.yaw.i\" />\n      D <input type=\"number\" ng-model=\"pid.yaw.d\" />\n    <br />\n    alt:\n      P <input type=\"number\" ng-model=\"pid.alt.p\" />\n      I <input type=\"number\" ng-model=\"pid.alt.i\" />\n      D <input type=\"number\" ng-model=\"pid.alt.d\" />\n    <br />\n    pos:\n      P <input type=\"number\" ng-model=\"pid.pos.p\" />\n      I <input type=\"number\" ng-model=\"pid.pos.i\" />\n      D <input type=\"number\" ng-model=\"pid.pos.d\" />\n    <br />\n    posr:\n      P <input type=\"number\" ng-model=\"pid.posr.p\" />\n      I <input type=\"number\" ng-model=\"pid.posr.i\" />\n      D <input type=\"number\" ng-model=\"pid.posr.d\" />\n    <br />\n    navr:\n      P <input type=\"number\" ng-model=\"pid.navr.p\" />\n      I <input type=\"number\" ng-model=\"pid.navr.i\" />\n      D <input type=\"number\" ng-model=\"pid.navr.d\" />\n    <br />\n    level:\n      P <input type=\"number\" ng-model=\"pid.level.p\" />\n      I <input type=\"number\" ng-model=\"pid.level.i\" />\n      D <input type=\"number\" ng-model=\"pid.level.d\" />\n    <br />\n    mag:\n      P <input type=\"number\" ng-model=\"pid.mag.p\" />\n      I <input type=\"number\" ng-model=\"pid.mag.i\" />\n      D <input type=\"number\" ng-model=\"pid.mag.d\" />\n    <br />\n    <button ng-click=\"setPid()\">SEND</button>\n  </div>\n</div>\n");
-$templateCache.put("partials/drone/drone.html","<div class=\"drone\" ng-controller=\"DroneCtrl as drone\">\n  <h2>Drone</h2>\n  <input type=\"text\" placeholder=\"IP\" /> <button>Connect</button>\n\n  <section>\n    <h3>Motors</h3>\n  </section>\n\n  <section>\n    <h3>Attitude / Altitude / Heading</h3>\n    <artificial-horizon></artificial-horizon>\n    <compass></compass>\n    <altimeter></altimeter>\n  </section>\n\n  <section>\n    <h3>Controls</h3>\n    Throttle:\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1100\"></adjustable-slider>\n    Roll:\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1500\"></adjustable-slider>\n    Pitch:\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1500\"></adjustable-slider>\n    Yaw:\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1500\"></adjustable-slider>\n  </section>\n</div>");
-$templateCache.put("partials/dualShock/dualShock.html","<div ng-controller=\"DualShockCtrl as ctrl\">\n  DualShock\n  <button ng-click=\"ctrl.connect()\" ng-hide=\"connected\">Connect</button>\n  <span ng-show=\"connected\">Connected</span>\n\n  <dualshock-move control=\"left\"></dualshock-move>\n  <dualshock-move control=\"right\"></dualshock-move>\n  <dualshock-analog control=\"r2\"></dualshock-analog>\n</div>");
-$templateCache.put("partials/main/main.html","<div ng-controller=\"MainCtrl\" class=\"container\">\n  <ng-include src=\"\'partials/dualShock/dualShock.html\'\"></ng-include>\n  <hr />\n  <ng-include src=\"\'partials/drone/drone.html\'\"></ng-include>\n</div>");
-$templateCache.put("partials/rc/rc.html","<div ng-controller=\"RcCtrl\">\n  <label for=\"roll\">Roll</label>\n  <input id=\"roll\" type=\"range\" ng-model=\"rc.roll\" />\n\n  <label for=\"pitch\">Pitch</label>\n  <input id=\"pitch\" type=\"range\" ng-model=\"rc.pitch\" />\n\n  <label for=\"yaw\">Yaw</label>\n  <input id=\"yaw\" type=\"range\" ng-model=\"rc.yaw\" />\n\n  <label for=\"throttle\">Throttle</label>\n  <input id=\"throttle\" type=\"range\" ng-model=\"rc.throttle\" />\n</div>");}]);
 angular.module('hk-aerial-gui').factory('Drone', function (Socket) {
   'use strict';
 
@@ -26261,17 +26300,35 @@ angular.module('hk-aerial-gui').run(function () {
 angular.module('hk-aerial-gui').directive('adjustableSlider', function () {
   'use strict';
 
+  var $this = {}; // w00t!
+
+  $this.getNormalizedValue = function ( min, max, value ) {
+    return (value-min) / (max-min);
+  };
+
   return {
     restrict: 'E',
     replace: true,
     scope: {
-
+      min: '=',
+      max: '=',
+      middle: '=',
+      value: '='
     },
     templateUrl: 'directives/adjustableSlider/adjustableSlider.html',
     link: function (scope, element, attrs, fn) {
+      var sliderPxWidth = element[0].style.width.replace('px', '') | 0;
+      
+      var middlePosition = $this.getNormalizedValue(scope.min, scope.max, scope.middle);
+      var valuePosition = $this.getNormalizedValue(scope.min, scope.max, scope.value);
 
-
-    }
+      if (middlePosition < 0 || middlePosition > 1 || valuePosition < 0 || valuePosition > 1)
+        scope.outOfBoundsErrorClass = "outOfBounds";
+      else
+        scope.outOfBoundsErrorClass = "";
+      scope.middlePxPosition = (middlePosition * sliderPxWidth);
+      scope.valuePxPosition = (valuePosition * sliderPxWidth);
+    },
   };
 });
 angular.module('hk-aerial-gui').directive('altimeter', function () {
@@ -26359,10 +26416,10 @@ angular.module('hk-aerial-gui').directive('dualshockMove', function ($rootScope)
     }
   };
 });
-angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope) {
+angular.module('hk-aerial-gui').controller('DebugCtrl', function ($scope) {
   
 });
-angular.module('hk-aerial-gui').controller('DebugCtrl', function ($scope) {
+angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope) {
   
 });
 angular.module('hk-aerial-gui').controller('DualShockCtrl', function ($scope, DualShock) {
@@ -26382,4 +26439,16 @@ angular.module('hk-aerial-gui').controller('MainCtrl', function ($scope) {
 angular.module('hk-aerial-gui').controller('RcCtrl', function ($scope) {
   
 });
+angular.module("hk-aerial-gui").run(["$templateCache", function($templateCache) {$templateCache.put("index.html","<!doctype html>\r\n<html ng-app=\"hk-aerial-gui\">\r\n<head>\r\n  <title></title>\r\n\r\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n  <meta charset=\"utf-8\">\r\n\r\n  <!-- App LESS -->\r\n  <link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\" />\r\n\r\n</head>\r\n<body>\r\n\r\n  <!-- Livereload script for development only (stripped during dist build) -->\r\n  <script src=\"http://localhost:35729/livereload.js\" data-build=\"exclude\"></script>\r\n\r\n  <!-- JS from Bower components -->\r\n  <script src=\"bower_components/angular/angular.js\"></script>\r\n\r\n  <!-- Main App JS -->\r\n  <script src=\"setup/module.js\"></script>\r\n  <script src=\"setup/config.js\"></script>\r\n  <script src=\"setup/run.js\"></script>\r\n\r\n  <!-- controllers -->\r\n  <!-- /controllers -->\r\n\r\n  <!-- directives -->\r\n  <script src=\"directives/dualshockAnalog/dualshockAnalog.js\"></script>\r\n  <script src=\"directives/dualshockMove/dualshockMove.js\"></script>\r\n  <script src=\"directives/artificialHorizon/artificialHorizon.js\"></script>\r\n  <script src=\"directives/compass/compass.js\"></script>\r\n  <script src=\"directives/altimeter/altimeter.js\"></script>\r\n  <script src=\"directives/adjustableSlider/adjustableSlider.js\"></script>\r\n  <!-- /directives -->\r\n\r\n  <!-- filters -->\r\n  <!-- /filters -->\r\n\r\n  <!-- models -->\r\n  <script src=\"models/drone.js\"></script>\r\n  <script src=\"models/dualShock.js\"></script>\r\n  <!-- /models -->\r\n\r\n  <!-- partials -->\r\n  <script src=\"partials/main/mainCtrl.js\"></script>\r\n  <script src=\"partials/connect/connectCtrl.js\"></script>\r\n  <script src=\"partials/debug/debugCtrl.js\"></script>\r\n  <script src=\"partials/rc/rcCtrl.js\"></script>\r\n  <script src=\"partials/dualShock/dualShockCtrl.js\"></script>\r\n  <script src=\"partials/drone/droneCtrl.js\"></script>\r\n  <!-- /partials -->\r\n\r\n  <!-- services -->\r\n  <script src=\"services/socket.js\"></script>\r\n  <!-- /services -->\r\n\r\n  <ng-include src=\"\'partials/main/main.html\'\"></ng-include>\r\n  \r\n</body>\r\n</html>");
+$templateCache.put("directives/adjustableSlider/adjustableSlider.html","<div class=\"adjustableSlider {{outOfBoundsErrorClass}}\">\r\n  <div class=\"middle marker\" style=\"left: {{middlePxPosition}}px;\" />\r\n  <div class=\"value marker\" style=\"left: {{valuePxPosition}}px;\" />\r\n</div>");
+$templateCache.put("directives/altimeter/altimeter.html","<div class=\"altimeter\">\r\n  Altimeter\r\n</div>");
+$templateCache.put("directives/artificialHorizon/artificialHorizon.html","<div class=\"artificialHorizon\">\r\n  Artificial horizon\r\n</div>");
+$templateCache.put("directives/compass/compass.html","<div class=\"compass\">\r\n  Compass\r\n</div>");
+$templateCache.put("directives/dualshockAnalog/dualshockAnalog.html","<div>\r\n  \r\n</div>");
+$templateCache.put("directives/dualshockMove/dualshockMove.html","<div class=\"dualshockMove\">\r\n  <div class=\"point\" />\r\n</div>");
+$templateCache.put("partials/debug/debug.html","<div class=\"debug\" ng-controller=\"DebugCtrl\">\r\n  <pre>\r\n    Pitch: {{rc.pitch}}\r\n    Roll: {{rc.roll}}\r\n    Yaw: {{rc.yaw}}\r\n    Throttle: {{rc.throttle}}\r\n    Aux1: {{rc.aux1}}\r\n    Aux1: {{rc.aux2}}\r\n    Aux1: {{rc.aux3}}\r\n    Aux1: {{rc.aux4}}\r\n    Motor: {{motor}}\r\n    Motor (computed): {{motorComputed}}\r\n    Servo: {{servo[5]}}\r\n    Angles: {{attitude.angles[0]}} {{attitude.angles[1]}}\r\n    Heading: {{attitude.heading}}\r\n    HeadFreeModeHold: {{attitude.headFreeModeHold}}\r\n    AccSmooth: {{rawImu.accSmooth}}\r\n    GyroData: {{rawImu.gyroData}}\r\n    MagADC: {{rawImu.magADC}}\r\n    Range: {{range}}\r\n  </pre>\r\n  <pre>\r\n    Atomic: {{atomic}}\r\n  </pre>\r\n  <div class=\"well\">\r\n    roll:\r\n      P <input type=\"number\" ng-model=\"pid.roll.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.roll.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.roll.d\" />\r\n    <br />\r\n    pitch:\r\n      P <input type=\"number\" ng-model=\"pid.pitch.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.pitch.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.pitch.d\" />\r\n    <br />\r\n    yaw:\r\n      P <input type=\"number\" ng-model=\"pid.yaw.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.yaw.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.yaw.d\" />\r\n    <br />\r\n    alt:\r\n      P <input type=\"number\" ng-model=\"pid.alt.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.alt.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.alt.d\" />\r\n    <br />\r\n    pos:\r\n      P <input type=\"number\" ng-model=\"pid.pos.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.pos.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.pos.d\" />\r\n    <br />\r\n    posr:\r\n      P <input type=\"number\" ng-model=\"pid.posr.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.posr.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.posr.d\" />\r\n    <br />\r\n    navr:\r\n      P <input type=\"number\" ng-model=\"pid.navr.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.navr.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.navr.d\" />\r\n    <br />\r\n    level:\r\n      P <input type=\"number\" ng-model=\"pid.level.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.level.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.level.d\" />\r\n    <br />\r\n    mag:\r\n      P <input type=\"number\" ng-model=\"pid.mag.p\" />\r\n      I <input type=\"number\" ng-model=\"pid.mag.i\" />\r\n      D <input type=\"number\" ng-model=\"pid.mag.d\" />\r\n    <br />\r\n    <button ng-click=\"setPid()\">SEND</button>\r\n  </div>\r\n</div>\r\n");
+$templateCache.put("partials/drone/drone.html","<div class=\"drone\" ng-controller=\"DroneCtrl as drone\">\r\n  <h2>Drone</h2>\r\n  <input type=\"text\" placeholder=\"IP\" /> <button>Connect</button>\r\n\r\n  <section>\r\n    <h3>Motors</h3>\r\n  </section>\r\n\r\n  <section>\r\n    <h3>Attitude / Altitude / Heading</h3>\r\n    <artificial-horizon></artificial-horizon>\r\n    <compass></compass>\r\n    <altimeter></altimeter>\r\n  </section>\r\n\r\n  <section>\r\n    <h3>Controls</h3>\r\n    Throttle:\r\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1100\" value=\"1500\" style=\"width: 600px; height: 20px;\"></adjustable-slider>\r\n    Roll:\r\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1100\" value=\"1000\" style=\"width: 600px; height: 20px;\"></adjustable-slider>\r\n    Pitch:\r\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1600\" value=\"1200\" style=\"width: 600px; height: 20px;\"></adjustable-slider>\r\n    Yaw:\r\n    <adjustable-slider min=\"1100\" max=\"1900\" middle=\"1500\" value=\"1100\" style=\"width: 600px; height: 20px;\"></adjustable-slider>\r\n  </section>\r\n</div>");
+$templateCache.put("partials/dualShock/dualShock.html","<div ng-controller=\"DualShockCtrl as ctrl\">\r\n  DualShock\r\n  <button ng-click=\"ctrl.connect()\" ng-hide=\"connected\">Connect</button>\r\n  <span ng-show=\"connected\">Connected</span>\r\n\r\n  <dualshock-move control=\"left\"></dualshock-move>\r\n  <dualshock-move control=\"right\"></dualshock-move>\r\n  <dualshock-analog control=\"r2\"></dualshock-analog>\r\n</div>");
+$templateCache.put("partials/main/main.html","<div ng-controller=\"MainCtrl\" class=\"container\">\r\n  <ng-include src=\"\'partials/dualShock/dualShock.html\'\"></ng-include>\r\n  <hr />\r\n  <ng-include src=\"\'partials/drone/drone.html\'\"></ng-include>\r\n</div>");
+$templateCache.put("partials/rc/rc.html","<div ng-controller=\"RcCtrl\">\r\n  <label for=\"roll\">Roll</label>\r\n  <input id=\"roll\" type=\"range\" ng-model=\"rc.roll\" />\r\n\r\n  <label for=\"pitch\">Pitch</label>\r\n  <input id=\"pitch\" type=\"range\" ng-model=\"rc.pitch\" />\r\n\r\n  <label for=\"yaw\">Yaw</label>\r\n  <input id=\"yaw\" type=\"range\" ng-model=\"rc.yaw\" />\r\n\r\n  <label for=\"throttle\">Throttle</label>\r\n  <input id=\"throttle\" type=\"range\" ng-model=\"rc.throttle\" />\r\n</div>");}]);
 //# sourceMappingURL=maps/app.js.map

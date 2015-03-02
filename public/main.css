@@ -1,6 +1,28 @@
 body {
   background-color: 'red';
 }
+.adjustableSlider {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border: 1px solid #000;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.adjustableSlider .marker {
+  position: absolute;
+  width: 4px;
+  height: 100%;
+  margin-left: -2px;
+  background-color: #ddd;
+}
+.adjustableSlider .value {
+  background-color: #333;
+}
+.outOfBounds {
+  background-color: #f00;
+}
 .dualshockMove {
   position: relative;
   width: 255px;
