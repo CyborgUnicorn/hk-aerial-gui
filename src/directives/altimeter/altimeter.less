@@ -1,3 +1,37 @@
 .altimeter {
-  
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #000;
+  float: left;
+
+  .dial {
+  	width: 200px;
+  	text-align: center;
+  	font-weight: 900;
+  	top: 20%;
+  	position: absolute;
+  }
+
+  .needle-root {
+  	height: 8px;
+  	width: 8px;
+  	background-color: #000;
+  	position: absolute;
+  	left: 96px;
+  	top: 96px;
+  	border-radius: 4px;
+
+  	.needle {
+  		border-radius: 2px;
+  		width: 4px;
+  		height: 90px;
+  		background-color: #000;
+  		position: relative;
+  		top: -88px;
+  		left: 2px;
+  	}
+  }
 }
