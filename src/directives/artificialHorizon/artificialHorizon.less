@@ -1,3 +1,84 @@
 .artificialHorizon {
-  
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  width: 200px;
+  height: 200px;
+
+  .plane {
+
+  }
+
+  .pitch, .pitch-lines {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pitch {
+    
+  }
+
+  .pitch-lines {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100px;
+    font-size: 10px;
+    color: #fff;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+
+    .value {
+      display: flex;
+      height: 25px;
+      .span, hr {
+        display: inline-block;
+      }
+
+      hr {
+        border: 0;
+        height: 1px;
+        background: #fff;
+        width: 60px;
+        margin: 6px 8px;
+      }
+    }
+  }
+
+  .roll {
+    width: 100%;
+    height: 100%;
+    transform: rotate(45deg);
+  }
+
+  .content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+  }
+
+  .heaven, .line, .ground {
+    position: relative;
+    width: 400px;
+    height: 400px;
+  }
+
+  .heaven {
+    background-color: #00f;
+  }
+
+  .line {
+    background-color: #fff;
+    height: 2px;
+  }
+
+  .ground {
+    background-color: #0f0;
+  }
 }
