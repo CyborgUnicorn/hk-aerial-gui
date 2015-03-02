@@ -5,12 +5,16 @@ angular.module('hk-aerial-gui').directive('artificialHorizon', function () {
     restrict: 'E',
     replace: true,
     scope: {
-
+      roll: '=',
+      pitch: '='
     },
     templateUrl: 'directives/artificialHorizon/artificialHorizon.html',
     link: function (scope, element, attrs, fn) {
-
-
+      function render() {
+        scope.rollRotation = scope.roll;
+        scope.pitchOffset = scope.pitch * 25;
+      }
+      scope.$watchGroup(['pitch', 'roll'], render);
     }
   };
 });

@@ -5,8 +5,9 @@ angular.module('hk-aerial-gui').directive('altimeter', function () {
     var result = '';
     var numChars = totalAltitude.toString().length;
     var desiredChars = 6;
-    for ( var i = numChars; i < desiredChars; ++i )
+    for ( var i = numChars; i < desiredChars; ++i) {
       result += '0';
+    }
 
     return result + totalAltitude;
   }
@@ -25,8 +26,12 @@ angular.module('hk-aerial-gui').directive('altimeter', function () {
     templateUrl: 'directives/altimeter/altimeter.html',
     link: function (scope, element, attrs, fn) {
 
-      scope.totalAltitude = getTotalAltitudeString(scope.altitude);
-      scope.needleRotation = getNeedleAngle(scope.altitude);
+      function render() {
+        scope.totalAltitude = getTotalAltitudeString(scope.altitude);
+        scope.needleRotation = getNeedleAngle(scope.altitude);
+      }
+
+      scope.$watch('altitude', render);
     }
   };
 });
