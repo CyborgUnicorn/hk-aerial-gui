@@ -2,6 +2,8 @@ angular.module('hk-aerial-gui').directive('altimeter', function () {
   'use strict';
 
   function getTotalAltitudeString(totalAltitude) {
+    if(!totalAltitude) { totalAltitude = 0; }
+
     var result = '';
     var numChars = totalAltitude.toString().length;
     var desiredChars = 6;
@@ -13,6 +15,8 @@ angular.module('hk-aerial-gui').directive('altimeter', function () {
   }
 
   function getNeedleAngle(totalAltitude) {
+    if(!totalAltitude) { totalAltitude = 0; }
+
     var circleMod = 100;
     return (totalAltitude / circleMod) * 360;
   }

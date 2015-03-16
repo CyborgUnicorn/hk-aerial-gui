@@ -42,6 +42,10 @@ gulp.task('templates', function () {
     .pipe(templates({module: 'hk-aerial-gui'}))
     .pipe(gulp.dest('./src'));
 });
+gulp.task('resources', function () {
+  return gulp.src('src/images/**/*', {base: './src/images'})
+    .pipe(gulp.dest('./public/images/'));
+});
 gulp.task('concat', function () {
   return gulp.src([
       'bower_components/angular/angular.js',
@@ -79,7 +83,7 @@ gulp.task('html', function () {
 gulp.task('build', function (cb) {
   running.build = true;
 
-  runSequence('less', 'templates', 'concat', 'html', function () { cb(); });
+  runSequence('less', 'templates', 'concat', 'resources', 'html', function () { cb(); });
 });
 
 gulp.task('watch', function () {
@@ -93,6 +97,7 @@ gulp.task('watch', function () {
     gulp.watch(['src/**/*.js'], ['concat']);
     gulp.watch(['src/**/*.less'], ['less']);
     gulp.watch(['src/**/*.html', '!src/index.html'], ['templates']);
+    gulp.watch(['src/images/**/*'], ['resources']);
     gulp.watch(['src/index.html'], ['html']);
 
     livereload.listen();
