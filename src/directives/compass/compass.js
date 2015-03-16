@@ -5,12 +5,16 @@ angular.module('hk-aerial-gui').directive('compass', function () {
     restrict: 'E',
     replace: true,
     scope: {
-
+      degrees: '='
     },
     templateUrl: 'directives/compass/compass.html',
     link: function (scope, element, attrs, fn) {
 
+      function render() {
+        scope.compassRotation = scope.degrees;
+      }
 
+      scope.$watch('degrees', render);
     }
   };
 });
