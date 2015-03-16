@@ -12,6 +12,8 @@ describe('/models/Drone', function () {
   it('can be instantiated', function () {
     expect(new Drone()).to.be.instanceof(Drone);
   });
-  it('should have more tests');
+  it('should have more tests', function () {
+    
+  });
 
 });
