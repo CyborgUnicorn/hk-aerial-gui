@@ -8,4 +8,9 @@ angular.module('hk-aerial-gui').controller('DualShockCtrl', function ($scope, Du
       $scope.connected = true;
     });
   };
+
+  $scope.$on('dualshock:change', function (event, data) {
+    $scope.data = JSON.stringify(data, null, 2);
+    $scope.$digest();
+  });
 });

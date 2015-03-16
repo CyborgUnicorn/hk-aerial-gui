@@ -14,7 +14,10 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
         right: false,
         down: false,
         left: false
-      }
+      },
+      rightLeft: {},
+      forwardBackward: {},
+      upDown: {}
     };
   }
 
@@ -28,6 +31,7 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
         else { console.log('dualshock connected'); }
 
         socket.on('dualshock', function (event, data) {
+          console.log(event);
           switch(event) {
             case 'left:move':
               self.data.left = data;
@@ -35,8 +39,71 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
             case 'right:move':
               self.data.right = data;
               break;
+            case 'l1:analog':
+              self.data.l1 = data;
+              break;
+            case 'l2:analog':
+              self.data.l2 = data;
+              break;
+            case 'r1:analog':
+              self.data.r1 = data;
+              break;
             case 'r2:analog':
               self.data.r2 = data;
+              break;
+            case 'circle:press':
+              self.data.circle = true;
+              break;
+            case 'circle:release':
+              self.data.circle = false;
+              break;
+            case 'triangle:press':
+              self.data.triangle = true;
+              break;
+            case 'triangle:release':
+              self.data.triangle = false;
+              break;
+            case 'square:press':
+              self.data.square = true;
+              break;
+            case 'square:release':
+              self.data.square = false;
+              break;
+            case 'x:press':
+              self.data.x = true;
+              break;
+            case 'x:release':
+              self.data.x = false;
+              break;
+            case 'select:press':
+              self.data.select = true;
+              break;
+            case 'select:release':
+              self.data.select = false;
+              break;
+            case 'start:press':
+              self.data.start = true;
+              break;
+            case 'start:release':
+              self.data.start = false;
+              break;
+            case 'psxButton:press':
+              self.data.psxButton = true;
+              break;
+            case 'psxButton:release':
+              self.data.psxButton = false;
+              break;
+            case 'leftAnalogBump:press':
+              self.data.leftAnalogBump = true;
+              break;
+            case 'leftAnalogBump:release':
+              self.data.leftAnalogBump = false;
+              break;
+            case 'rightAnalogBump:press':
+              self.data.rightAnalogBump = true;
+              break;
+            case 'rightAnalogBump:release':
+              self.data.rightAnalogBump = false;
               break;
             case 'dpadLeft:press':
               self.data.dpad.left = true;
@@ -62,8 +129,17 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
             case 'dpadDown:release':
               self.data.dpad.down = false;
               break;
+            case 'rightLeft:motion':
+              self.data.rightLeft = data;
+              break;
+            case 'forwardBackward:motion':
+              self.data.forwardBackward = data;
+              break;
+            case 'upDown:motion':
+              self.data.upDown = data;
+              break;
           }
-          $rootScope.$emit('dualshock:change', self.data);
+          $rootScope.$broadcast('dualshock:change', self.data);
         });
 
         done();

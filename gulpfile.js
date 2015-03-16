@@ -1,6 +1,6 @@
 var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
-  mochaPhantom = require('gulp-mocha-phantomjs'),
+  mochaPhantomJS = require('gulp-mocha-phantomjs'),
   runSequence = require('run-sequence'),
   less = require('gulp-less'),
   sourcemaps = require('gulp-sourcemaps'),
@@ -26,8 +26,8 @@ gulp.task('jshint', function () {
 gulp.task('test', function () {
   running.test = true;
 
-  return gulp.src(['test/index.html'])
-    .pipe(mochaPhantom({reporter: 'spec'}));
+  return gulp.src(['test/**/*.html'])
+    .pipe(mochaPhantomJS({reporter: 'nyan'}));
 });
 
 gulp.task('less', function () {

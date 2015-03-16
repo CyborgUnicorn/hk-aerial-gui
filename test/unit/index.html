@@ -9,9 +9,6 @@
 
   <div id="mocha"></div>
 
-  <!-- Livereload script for development only (stripped during dist build) -->
-  <script src="http://localhost:35729/livereload.js"></script>
-
   <!-- JS from Bower components -->
   <script src="../../bower_components/angular/angular.js"></script>
   <script src="../../bower_components/eventemitter2/lib/eventemitter2.js"></script>
@@ -29,7 +26,13 @@
   <!-- Code files -->
 
   <!-- app -->
-  <script src="../../js/setup.js"></script>
+  <script src="../../src/setup/module.js"></script>
+  <script src="../../src/setup/config.js"></script>
+  <script src="../../src/setup/run.js"></script>
+
+  <!-- templates -->
+  <script src="../../src/templates.js"></script>
+  <!-- /templates -->
 
   <!-- controllers -->
   <!-- /controllers -->
@@ -54,7 +57,6 @@
 
   <!-- partials -->
   <script src="../../src/partials/main/mainCtrl.js"></script>
-  <script src="../../src/partials/connect/connectCtrl.js"></script>
   <script src="../../src/partials/debug/debugCtrl.js"></script>
   <script src="../../src/partials/rc/rcCtrl.js"></script>
   <script src="../../src/partials/dualShock/dualShockCtrl.js"></script>
@@ -106,7 +108,8 @@
   <!-- run mocha after all test are loaded -->
   <script type="text/javascript" charset="utf-8">
     // Only tests run in real browser, injected script run if options.run == true
-    if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+    if (window.mochaPhantomJS) {
+
       if (!Function.prototype.bind) {
         Function.prototype.bind = function(oThis) {
           if (typeof this !== 'function') {
@@ -131,6 +134,9 @@
           return fBound;
         };
       }
+      
+      mochaPhantomJS.run();
+    } else {
       mocha.run();
     }
   </script>
