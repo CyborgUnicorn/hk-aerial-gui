@@ -31,7 +31,6 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
         else { console.log('dualshock connected'); }
 
         socket.on('dualshock', function (event, data) {
-          console.log(event);
           switch(event) {
             case 'left:move':
               self.data.left = data;
