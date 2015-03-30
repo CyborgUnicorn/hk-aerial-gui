@@ -11,7 +11,9 @@ angular.module('hk-aerial-gui').directive('compass', function () {
     link: function (scope, element, attrs, fn) {
 
       function render() {
-        scope.compassRotation = scope.degrees;
+        if(scope.degrees !== undefined) {
+          scope.compassRotation = scope.degrees;
+        }
       }
 
       scope.$watch('degrees', render);

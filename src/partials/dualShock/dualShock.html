@@ -1,11 +1,11 @@
-<div ng-controller="DualShockCtrl as ctrl">
+<div ng-controller="DualShockCtrl as vm">
   DualShock
-  <button ng-click="ctrl.connect()" ng-hide="connected">Connect</button>
-  <span ng-show="connected">Connected</span>
+  <button ng-click="vm.controller.connect()" ng-hide="vm.controller.connected">Connect</button>
+  <span ng-show="vm.controller.connected">Connected</span>
 
-  <dualshock-move control="left"></dualshock-move>
-  <dualshock-move control="right"></dualshock-move>
-  <dualshock-analog control="r2"></dualshock-analog>
+  <dualshock-move value="vm.controller.data.left"></dualshock-move>
+  <dualshock-move value="vm.controller.data.right"></dualshock-move>
+  <dualshock-analog value="vm.controller.data.r2"></dualshock-analog>
   <pre>
     {{data}}
   </pre>

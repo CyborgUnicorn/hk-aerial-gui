@@ -1,19 +1,20 @@
-angular.module('hk-aerial-gui').directive('dualshockMove', function ($rootScope) {
+angular.module('hk-aerial-gui').directive('dualshockMove', function (DualShock) {
   'use strict';
 
   return {
     restrict: 'E',
     replace: false,
     scope: {
-      control: '='
+      value: '='
     },
     templateUrl: 'directives/dualshockMove/dualshockMove.html',
     link: function (scope, element, attrs, fn) {
       var point = element.children()[0].children[0];
-      $rootScope.$on('dualshock:change', function (event, data) {
-        if(data) {
-          point.style.left = (data[attrs.control].x -1) + 'px';
-          point.style.top = (data[attrs.control].y -1) + 'px';
+
+      scope.$watch('value', function () {
+        if(scope.value) {
+          point.style.left = (scope.value.x -1) + 'px';
+          point.style.top = (scope.value.y -1) + 'px';
         }
       });
     }

@@ -1,16 +1,20 @@
 angular.module('hk-aerial-gui').controller('DualShockCtrl', function ($scope, DualShock) {
   
-  $scope.controller = new DualShock();
-  $scope.connected = false;
+  var vm = this;
 
-  this.connect = function () {
-    $scope.controller.connect(function () {
-      $scope.connected = true;
-    });
-  };
+  function activate() {
+    vm.controller = DualShock.get();
+    vm.controller.on('change', onControllerChange);
+  }
 
-  $scope.$on('dualshock:change', function (event, data) {
-    $scope.data = JSON.stringify(data, null, 2);
-    $scope.$digest();
-  });
+  function onControllerChange() {
+    $scope.$safeApply();
+  }
+
+  function destroy() {
+    vm.controller.off('emit', onControllerChange);
+  }
+
+  $scope.$on('$destroy', destroy);
+  activate();
 });

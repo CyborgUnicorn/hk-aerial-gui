@@ -1,13 +1,13 @@
-<div ng-controller="RcCtrl">
+<div ng-controller="RcCtrl as vm">
   <label for="roll">Roll</label>
-  <input id="roll" type="range" ng-model="rc.roll" />
+  <input id="roll" type="range" ng-model="vm.roll" />
 
   <label for="pitch">Pitch</label>
-  <input id="pitch" type="range" ng-model="rc.pitch" />
+  <input id="pitch" type="range" ng-model="vm.pitch" />
 
   <label for="yaw">Yaw</label>
-  <input id="yaw" type="range" ng-model="rc.yaw" />
+  <input id="yaw" type="range" ng-model="vm.yaw" />
 
   <label for="throttle">Throttle</label>
-  <input id="throttle" type="range" ng-model="rc.throttle" />
+  <input id="throttle" type="range" ng-model="vm.throttle" />
 </div>

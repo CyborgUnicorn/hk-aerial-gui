@@ -1,5 +1,6 @@
 var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
+  plumber = require('gulp-plumber'),
   mochaPhantomJS = require('gulp-mocha-phantomjs'),
   runSequence = require('run-sequence'),
   less = require('gulp-less'),
@@ -27,7 +28,8 @@ gulp.task('test', function () {
   running.test = true;
 
   return gulp.src(['test/**/*.html'])
-    .pipe(mochaPhantomJS({reporter: 'nyan'}));
+    .pipe(plumber())
+    .pipe(mochaPhantomJS({reporter: 'spec'}));
 });
 
 gulp.task('less', function () {

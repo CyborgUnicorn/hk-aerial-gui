@@ -31,8 +31,10 @@ angular.module('hk-aerial-gui').directive('altimeter', function () {
     link: function (scope, element, attrs, fn) {
 
       function render() {
-        scope.totalAltitude = getTotalAltitudeString(scope.altitude);
-        scope.needleRotation = getNeedleAngle(scope.altitude);
+        if(scope.altitude !== undefined) {
+          scope.totalAltitude = getTotalAltitudeString(scope.altitude);
+          scope.needleRotation = getNeedleAngle(scope.altitude);
+        }
       }
 
       scope.$watch('altitude', render);

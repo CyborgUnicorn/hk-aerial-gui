@@ -1,5 +1,7 @@
-angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socket) {
+angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socket, EventEmitter) {
   'use strict';
+
+  var _instance;
 
   function DualShock() {
     this.data = {
@@ -19,16 +21,25 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
       forwardBackward: {},
       upDown: {}
     };
+
+    this.connected = false;
   }
 
-  DualShock.prototype.connect = function (done) {
+  DualShock.prototype = Object.create(EventEmitter.prototype);
+  DualShock.prototype.constructor = DualShock;
+
+  DualShock.prototype.connect = function () {
     var socket = new Socket();
     var self = this;
 
     socket.on('connect', function () {
       socket.emit('dualshock:connect', function (err) {
         if(err) { console.error(err); }
-        else { console.log('dualshock connected'); }
+        else {
+          console.log('dualshock connected');
+          self.connected = true;
+          self.emit('change', self.data);
+        }
 
         socket.on('dualshock', function (event, data) {
           switch(event) {
@@ -138,14 +149,19 @@ angular.module('hk-aerial-gui').factory('DualShock', function ($rootScope, Socke
               self.data.upDown = data;
               break;
           }
-          $rootScope.$broadcast('dualshock:change', self.data);
+          self.emit('change', self.data);
         });
-
-        done();
       });
     });
     
     this.socket = socket;
+  };
+
+  DualShock.get = function () {
+    if(!_instance) {
+      _instance = new DualShock();
+    }
+    return _instance;
   };
 
   return DualShock;

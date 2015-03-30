@@ -11,8 +11,10 @@ angular.module('hk-aerial-gui').directive('artificialHorizon', function () {
     templateUrl: 'directives/artificialHorizon/artificialHorizon.html',
     link: function (scope, element, attrs, fn) {
       function render() {
-        scope.rollRotation = scope.roll;
-        scope.pitchOffset = scope.pitch * 25;
+        if(scope.roll !== undefined && scope.pitch !== undefined) {
+          scope.rollRotation = scope.roll;
+          scope.pitchOffset = scope.pitch * 25;
+        }
       }
       scope.$watchGroup(['pitch', 'roll'], render);
     }

@@ -1,4 +1,4 @@
-<div class="drone" ng-controller="DroneCtrl as drone">
+<div class="drone" ng-controller="DroneCtrl as vm">
   <h2>Drone</h2>
   <input type="text" placeholder="IP" /> <button>Connect</button>
 
@@ -9,21 +9,40 @@
   <section>
     <h3>Attitude / Altitude / Heading</h3>
     <div class="meters">
-      <artificial-horizon roll="roll" pitch="pitch"></artificial-horizon>
-      <compass degrees="degrees"></compass>
-      <altimeter altitude="altitude"></altimeter>
+      <artificial-horizon roll="vm.drone.roll" pitch="vm.drone.pitch"></artificial-horizon>
+      <compass degrees="vm.drone.heading"></compass>
+      <altimeter altitude="vm.drone.altitude"></altimeter>
     </div>
   </section>
 
   <section>
     <h3>Controls</h3>
     Throttle:
-    <adjustable-slider min="1100" max="1900" middle="1100" value="1500" style="width: 600px; height: 20px;"></adjustable-slider>
+    <adjustable-slider
+      min="1100"
+      max="1900"
+      middle="1100"
+      value="vm.throttle"
+      style="width: 600px; height: 20px;"></adjustable-slider>
     Roll:
-    <adjustable-slider min="1100" max="1900" middle="1100" value="1000" style="width: 600px; height: 20px;"></adjustable-slider>
+    <adjustable-slider
+      min="1400" max="1600"
+      middle="1500"
+      value="vm.roll"
+      style="width: 600px; height: 20px;"></adjustable-slider>
     Pitch:
-    <adjustable-slider min="1100" max="1900" middle="1600" value="1200" style="width: 600px; height: 20px;"></adjustable-slider>
+    <adjustable-slider
+      min="1400"
+      max="1600"
+      middle="1500"
+      value="vm.pitch"
+      style="width: 600px; height: 20px;"></adjustable-slider>
     Yaw:
-    <adjustable-slider min="1100" max="1900" middle="1500" value="1100" style="width: 600px; height: 20px;"></adjustable-slider>
+    <adjustable-slider
+      min="1100"
+      max="1900"
+      middle="1500"
+      value="vm.yaw"
+      style="width: 600px; height: 20px;"></adjustable-slider>
   </section>
 </div>
