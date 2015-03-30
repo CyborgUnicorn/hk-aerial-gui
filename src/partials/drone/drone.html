@@ -1,6 +1,6 @@
 <div class="drone" ng-controller="DroneCtrl as vm">
   <h2>Drone</h2>
-  <input type="text" placeholder="IP" /> <button>Connect</button>
+  <input type="text" placeholder="IP" ng-model="vm.droneAddress" /> <button>Connect</button>
 
   <section>
     <h3>Motors</h3>
@@ -19,30 +19,19 @@
     <h3>Controls</h3>
     Throttle:
     <adjustable-slider
-      min="1100"
-      max="1900"
-      middle="1100"
-      value="vm.throttle"
+      data="vm.throttle"
       style="width: 600px; height: 20px;"></adjustable-slider>
     Roll:
     <adjustable-slider
-      min="1400" max="1600"
-      middle="1500"
-      value="vm.roll"
+      data="vm.roll"
       style="width: 600px; height: 20px;"></adjustable-slider>
     Pitch:
     <adjustable-slider
-      min="1400"
-      max="1600"
-      middle="1500"
-      value="vm.pitch"
+      data="vm.pitch"
       style="width: 600px; height: 20px;"></adjustable-slider>
     Yaw:
     <adjustable-slider
-      min="1100"
-      max="1900"
-      middle="1500"
-      value="vm.yaw"
+      data="vm.yaw"
       style="width: 600px; height: 20px;"></adjustable-slider>
   </section>
 </div>
