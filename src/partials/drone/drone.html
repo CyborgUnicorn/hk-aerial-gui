@@ -1,17 +1,44 @@
 <div class="drone" ng-controller="DroneCtrl as vm">
-  <h2>Drone</h2>
-  <input type="text" placeholder="IP" ng-model="vm.droneAddress" /> <button>Connect</button>
+  <h2>
+    Drone
+
+    <span ng-if="!vm.drone.connected">
+      <input type="text" placeholder="IP" ng-model="vm.droneAddress" />
+      <button ng-click="vm.connect()">Connect</button>
+    </span>
+    <span ng-if="vm.drone.connected">
+      Connected
+    </span>
+  </h2>
+
+  
 
   <section>
     <h3>Motors</h3>
+    <div>
+      m1: {{vm.drone.data.motor[0]}} - {{vm.drone.data.motorComputed[0]}}
+    </div>
+    <div>
+      m2: {{vm.drone.data.motor[1]}} - {{vm.drone.data.motorComputed[1]}}
+    </div>
+    <div>
+      m3: {{vm.drone.data.motor[2]}} - {{vm.drone.data.motorComputed[2]}}
+    </div>
+    <div>
+      s5: {{vm.drone.data.servo[5]}}
+    </div>
   </section>
 
   <section>
     <h3>Attitude / Altitude / Heading</h3>
     <div class="meters">
-      <artificial-horizon roll="vm.drone.roll" pitch="vm.drone.pitch"></artificial-horizon>
-      <compass degrees="vm.drone.heading"></compass>
-      <altimeter altitude="vm.drone.altitude"></altimeter>
+      <artificial-horizon
+        roll="vm.drone.data.attitude.angles[0]"
+        pitch="vm.drone.data.attitude.angles[1]"></artificial-horizon>
+      <compass
+        degrees="vm.drone.data.attitude.heading"></compass>
+      <altimeter
+        altitude="vm.drone.data.range"></altimeter>
     </div>
   </section>
 

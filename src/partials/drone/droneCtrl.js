@@ -9,6 +9,8 @@ angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope, normal
   vm.pitch = {min: 1400, max: 1600, middle: 1500, value: 1500};
   vm.yaw = {min: 1100, max: 1900, middle: 1500, value: 1500};
 
+  vm.connect = connect;
+
   function activate() {
     vm.controller = DualShock.get();
     vm.controller.on('change', onControllerChange);
@@ -65,6 +67,8 @@ angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope, normal
       .from(0, 255)
       .to(vm.throttle.min, vm.throttle.max)
       .linear(data.r2) : 0;
+
+    vm.drone.rc(vm.roll.value, vm.pitch.value, vm.yaw.value, vm.throttle.value);
 
     $scope.$safeApply();
   }

@@ -4,7 +4,8 @@ angular.module('hk-aerial-gui').factory('Drone', function (EventEmitter, Socket)
   var _instance;
 
   function Drone() {
-
+    this.connected = false;
+    this.data = {};
   }
 
   Drone.prototype = Object.create(EventEmitter.prototype);
@@ -15,17 +16,35 @@ angular.module('hk-aerial-gui').factory('Drone', function (EventEmitter, Socket)
     this.socket.on('connect', this.onConnect.bind(this));
   };
 
+  Drone.prototype.rc = function (roll, pitch, yaw, throttle) {
+    if(this.connected) {
+      this.socket.emit('setRawRc', roll, pitch, yaw, throttle, 0, 0, 0, 0);
+    }
+  };
+
   Drone.prototype.onConnect = function () {
-    this.socket.on('motors', this.onMotors.bind(this));
-    this.socket.on('rc', this.onRc.bind(this));
-  };
+    var self = this;
+    var events = [
+      'rc',
+      'motor',
+      'motorComputed',
+      'servo',
+      'attitude',
+      'rawImu',
+      'pid',
+      'atomicServo',
+      'range'
+    ];
 
-  Drone.prototype.onMotors = function (data) {
+    events.forEach(function (eventName) {
+      self.socket.on(eventName, function (data) {
+        self.data[eventName] = data;
+        self.emit('change');
+      });
+    });
 
-  };
-
-  Drone.prototype.onRc = function (data) {
-
+    this.connected = true;
+    this.emit('change');
   };
 
   Drone.get = function () {
