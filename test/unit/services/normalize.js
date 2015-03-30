@@ -25,22 +25,60 @@ describe.only('/services/normalize', function () {
     expect(normalizer._to).to.eql({low: 0, high: 255});
   });
 
-  describe('#calc', function () {
+  describe('#linear', function () {
     it('calculates 0 from 0-255 to 0-1 correctly', function () {
       var normalizer = normalize.from(0, 255).to(0, 1);
-      expect(normalizer.calc(0)).to.equal(0);
+      expect(normalizer.linear(0)).to.equal(0);
     });
     it('calculates 255 from 0-255 to 0-1 correctly', function () {
       var normalizer = normalize.from(0, 255).to(0, 1);
-      expect(normalizer.calc(255)).to.equal(1);
+      expect(normalizer.linear(255)).to.equal(1);
     });
     it('calculates 128 from 0-255 to 0-1 correctly', function () {
       var normalizer = normalize.from(0, 255).to(0, 1);
-      expect(normalizer.calc(127.5)).to.equal(0.5);
+      expect(normalizer.linear(127.5)).to.equal(0.5);
     });
     it('calculates 128 from 0-255 to 1100-1900 correctly', function () {
       var normalizer = normalize.from(0, 255).to(1100, 1900);
-      expect(normalizer.calc(127.5)).to.equal(1500);
+      expect(normalizer.linear(127.5)).to.equal(1500);
+    });
+  });
+
+  describe('#quadratic', function () {
+    it('calculates 0 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.quadratic(0)).to.equal(0);
+    });
+    it('calculates 255 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.quadratic(255)).to.equal(1);
+    });
+    it('calculates 128 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.quadratic(127.5)).to.equal(0.5);
+    });
+    it('calculates 128 from 0-255 to 1100-1900 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(1100, 1900);
+      expect(normalizer.quadratic(127.5)).to.equal(1500);
+    });
+  });
+
+  describe('#cubic', function () {
+    it('calculates 0 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.cubic(0)).to.equal(0);
+    });
+    it('calculates 255 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.cubic(255)).to.equal(1);
+    });
+    it('calculates 128 from 0-255 to 0-1 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(0, 1);
+      expect(normalizer.cubic(127.5)).to.equal(0.5);
+    });
+    it('calculates 128 from 0-255 to 1100-1900 correctly', function () {
+      var normalizer = normalize.from(0, 255).to(1100, 1900);
+      expect(normalizer.cubic(127.5)).to.equal(1500);
     });
   });
 });

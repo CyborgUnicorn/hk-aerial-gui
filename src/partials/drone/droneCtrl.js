@@ -49,22 +49,22 @@ angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope, normal
     vm.roll.value = normalize
       .from(0, 255)
       .to(vm.roll.min, vm.roll.max)
-      .calc(data.left.x);
+      .cubic(data.left.x);
 
     vm.pitch.value = normalize
       .from(0, 255)
       .to(vm.pitch.min, vm.pitch.max)
-      .calc(data.left.y);
+      .cubic(data.left.y);
 
     vm.yaw.value = normalize
       .from(0, 255)
       .to(vm.yaw.min, vm.yaw.max)
-      .calc(data.right.x);
+      .cubic(data.right.x);
 
     vm.throttle.value = (vm.throttle.on) ? normalize
       .from(0, 255)
       .to(vm.throttle.min, vm.throttle.max)
-      .calc(data.r2) : 0;
+      .linear(data.r2) : 0;
 
     $scope.$safeApply();
   }
