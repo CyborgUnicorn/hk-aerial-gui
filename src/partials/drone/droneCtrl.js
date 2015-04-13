@@ -3,7 +3,8 @@ angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope, normal
   var step = 1;
 
   var vm = this;
-  vm.droneAddress = null;
+  vm.droneAddress = 'http://192.168.43.238:3000';
+  vm.wiiDevice = null;
   vm.throttle = {min: 1100, max: 1900, middle: 1100, value: 1100, on: true};
   vm.roll = {min: 1400, max: 1600, middle: 1500, value: 1500};
   vm.pitch = {min: 1400, max: 1600, middle: 1500, value: 1500};
@@ -30,8 +31,8 @@ angular.module('hk-aerial-gui').controller('DroneCtrl', function ($scope, normal
     vm.drone.on('change', onDroneChange);
   }
 
-  function connect() {
-    vm.drone.connect(vm.droneAddress);
+  function connect(address) {
+    vm.drone.connect(address);
   }
 
   function onLeft() { vm.roll.min -= step; vm.roll.max -= step; vm.roll.middle -= step; }

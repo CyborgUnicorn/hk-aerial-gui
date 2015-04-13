@@ -4,10 +4,20 @@
 
     <span ng-if="!vm.drone.connected">
       <input type="text" placeholder="IP" ng-model="vm.droneAddress" />
-      <button ng-click="vm.connect()">Connect</button>
+      <button ng-click="vm.connect(vm.droneAddress)">Connect</button>
     </span>
     <span ng-if="vm.drone.connected">
-      Connected
+      [socket]
+      <span ng-if="!vm.drone.wii.connected">
+        <select
+          ng-options="device.pnpId for device in vm.drone.wii.devices"
+          ng-model="vm.wiiDevice">
+        </select>
+        <button ng-click="vm.drone.wii.connect(vm.wiiDevice)">Connect</button>
+      </span>
+      <span ng-if="vm.drone.wii.connected">
+        [wii]
+      </span>
     </span>
   </h2>
 
@@ -34,9 +44,9 @@
     <div class="meters">
       <artificial-horizon
         roll="vm.drone.data.attitude.angles[0]"
-        pitch="vm.drone.data.attitude.angles[1]"></artificial-horizon>
+        pitch="vm.drone.data.attitude.angles[1]/100"></artificial-horizon>
       <compass
-        degrees="vm.drone.data.attitude.heading"></compass>
+        mag="vm.drone.data.rawImu.magADC"></compass>
       <altimeter
         altitude="vm.drone.data.range"></altimeter>
     </div>
